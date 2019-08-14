@@ -70,7 +70,11 @@
                         <h5 class="card-title">Result</h5>
                         <img class="img-fluid" id="imgDisplay"/>
                         <br/><br/>
-                        <h6>Your image is a: <span id="resultDisplay"></span></h6>       
+                        <h6>Your image is a: <span id="resultDisplay"></span></h6>      
+                        <br/>
+						<p>Cat: <span id="catDisplay"></span>%</p>
+						<p>Dog: <span id="dogDisplay"></span>%</p>
+                        <p>Meerkat: <span id="meerketDisplay"></span>%</p>
                         <br/>
                         <a href="index.html" class="btn btn-primary">Submit another image</a>                
                     </div>
@@ -122,6 +126,10 @@
                                 var finalClass = map[i];
 
                                 $("#resultDisplay").text(finalClass);
+								
+								$("#catDisplay").text((resultArray[0] * 100).toFixed(2));
+								$("#dogDisplay").text((resultArray[1] * 100).toFixed(2));
+								$("#meerketDisplay").text((resultArray[2] * 100).toFixed(2));
 
                                 $('#imgDisplay').attr('src', e.target.result);
                                 $("#progressCard").hide();
