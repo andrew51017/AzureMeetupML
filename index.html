@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>MeerNET</title>
+
+    <style type="text/css">
+    
+        main {
+            padding-top: 100px;
+        }
+        
+    </style>
+  </head>
+
+    <body>
+
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+            <a class="navbar-brand" href="#">MeerNET</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+
+        <main role="main" class="container">
+
+            <div class="starter-template">
+                <h1>MeerNET</h1>
+                <p class="lead">A Machine Learning model built using Azure ML Service</p>
+                <hr/>
+
+                <div class="card" id="formCard">
+
+                    <div class="card-body">
+                        <h5 class="card-title">Upload an image</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Select an image to classify it</h6>
+                        <form id="form" method="POST">
+                        
+                            <div class="form-group">
+                                <label for="selectedImage">Select an image</label>
+                                <input type="file" accept="image/jpeg" class="form-control-file" id="selectedImage">
+                            </div>
+
+                            <br/>
+
+                            <button class="btn btn-primary" type="submit">Submit!</button>
+                            
+                        </form>                        
+                    </div>
+                </div>
+
+                <hr/>
+
+                <div class="card" style="display: none;" id="progressCard">
+                        <div class="card-body">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                            </div>                            
+                        </div>
+                    </div> 
+
+                <div class="card" style="display: none;" id="resultCard">
+                    <div class="card-body">
+                        <h5 class="card-title">Result</h5>
+                        <img class="img-fluid" id="imgDisplay"/>
+                        <br/><br/>
+                        <h6>Your image is a: <span id="resultDisplay"></span></h6>       
+                        <br/>
+                        <a href="index.html" class="btn btn-primary">Submit another image</a>                
+                    </div>
+                </div>                
+
+            </div>
+
+        </main><!-- /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <script>
+            
+            $(document).ready(function() {
+
+                $("form").submit(function() {
+
+                    var fileCtl = $("#selectedImage")[0];
+                    if (!fileCtl || fileCtl.files.length == 0) return;
+
+                    $("#formCard").hide();
+                    $("#progressCard").show();
+
+                    var selectedFile = fileCtl.files[0];
+
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+
+                        var classifySample = e.target.result.replace('data:image/jpeg;base64,', '');
+
+                        var map = ['Cat', 'Dog', 'Meerkat'];
+
+                        fetch('https://ml-svc-gw.azurewebsites.net/score', { method: 'post', body: classifySample, headers: {'Content-Type': 'application/json'}})
+                            .then(function(response) {
+                                return response.json();
+                            })
+                            .then(function(response) {                                
+                                var parsedResp = JSON.parse(response);
+
+                                var resultArray = parsedResp[0];
+
+                                var i = resultArray.indexOf(Math.max(...resultArray));
+                                var finalClass = map[i];
+
+                                $("#resultDisplay").text(finalClass);
+
+                                $('#imgDisplay').attr('src', e.target.result);
+                                $("#progressCard").hide();
+                                $("#resultCard").show();
+
+                            })
+                            .catch(function(response) {
+                                alert("An error occurred!");
+                                $("#progressCard").hide();
+                                $("#formCard").show();                                
+                            });
+                    };
+
+                    reader.readAsDataURL(fileCtl.files[0]);  
+
+                    return false;
+
+                });
+
+            });
+        
+        </script>
+    
+
+    </body>
+
+</html>
